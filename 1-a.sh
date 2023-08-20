@@ -2,9 +2,9 @@
 			
 clear
 loadkeys la-latin1			
-#----------------------------------------
-#          Setting some vars
-#----------------------------------------
+
+#          Verificación de conexión a la red
+
 network(){
 testping=$(ping -q -c 1 -W 1 archlinux.org >/dev/null)
 
@@ -56,9 +56,9 @@ logo() {
 }
 	
 
-#----------------------------------------
-#          Getting Information   
-#----------------------------------------
+
+#          Obteniendo información usuario, root, Hostname 
+
 
 logo "Ingresa la informacion Necesaria"
 
@@ -109,19 +109,20 @@ done
 
 	clear
 
-#----------------------------------------
-#          Select DISK
-#----------------------------------------
+
+#          Seleccionar DISCO
+
 
 logo "Selecciona el disco para la instalacion"
 
 # Mostrar información de los discos disponibles
 echo "Discos disponibles:"
 lsblk -d -e 7,11 -o NAME,SIZE,TYPE,MODEL
-echo "------------------------------"
+echo "----"
 echo
 
 # Seleccionar el disco para la instalación de Arch Linux
+
 PS3="Escoge el DISCO (NO la particion) donde Arch Linux se instalara: "
 	select drive in $(lsblk -d | awk '{print "/dev/" $1}' | grep 'sd\|hd\|vd\|nvme\|mmcblk') 
 		do
@@ -131,9 +132,8 @@ PS3="Escoge el DISCO (NO la particion) donde Arch Linux se instalara: "
 		done
 			clear
 
-#----------------------------------------
+
 #          Creando y Montando particion raiz
-#----------------------------------------
 
 logo "Creando Particiones"
 
@@ -162,13 +162,12 @@ logo "Formatenado y Montando Particiones"
 			clear
 			
 		
-#----------------------------------------
+
 #          Creando y Montando SWAP
-#----------------------------------------
 
 logo "Configurando SWAP"
 
-			PS3="Escoge la particion SWAP: "
+	PS3="Escoge la particion SWAP: "
 	select swappart in $(fdisk -l | grep -E "swap" | cut -d" " -f1) "No quiero swap" "Crear archivo swap"
 		do
 			if [ "$swappart" = "Crear archivo swap" ]; then
@@ -201,11 +200,10 @@ logo "Configurando SWAP"
 				break
 			fi
 		done
-				clear
+clear
 	
-#----------------------------------------
-#          Info
-#----------------------------------------
+
+#          Información
 	
 		printf "\n\n%s\n\n" "--------------------"
 		printf " User:      %s%s%s\n" "${CBL}" "$USR" "${CNC}"
@@ -230,16 +228,12 @@ logo "Configurando SWAP"
 			* ) printf " Error: solo necesitas escribir 's' o 'n'\n\n";;
 		esac
 	done
-			clear
+clear
 
-
-#----------------------------------------
 #          Pacstrap base system
-#----------------------------------------
 
 logo "Instalando sistema base"
-
-	#sed -i 's/#Color/Color/; s/#ParallelDownloads = 5/ParallelDownloads = 5/; /^ParallelDownloads =/a ILoveCandy' /etc/pacman.conf
+	
 	pacstrap /mnt \
 	         base base-devel \
 	         linux-zen linux-firmware \
@@ -250,11 +244,10 @@ logo "Instalando sistema base"
 	         git
 	         
 	okie
-	clear
+clear
 
-#----------------------------------------
+
 #          Generating FSTAB
-#----------------------------------------
     
 logo "Generando FSTAB"
 
@@ -262,9 +255,7 @@ logo "Generando FSTAB"
 		okie
 	clear
 
-#----------------------------------------
 #          Timezone, Lang & Keyboard
-#----------------------------------------
 	
 logo "Configurando Timezone y Locales"
 		
@@ -277,11 +268,9 @@ logo "Configurando Timezone y Locales"
 	echo "KEYMAP=la-latin1" >> /mnt/etc/vconsole.conf
 	export LANG=es_AR.UTF-8
 	okie
-	clear
+clear
 
-#----------------------------------------
 #          Hostname & Hosts
-#----------------------------------------
 
 logo "Configurando Internet"
 
@@ -292,11 +281,9 @@ logo "Configurando Internet"
 		127.0.1.1   ${HNAME}.localdomain ${HNAME}
 	EOL
 	okie
-	clear
+clear
 
-#----------------------------------------
 #          Users & Passwords
-#----------------------------------------
     
 logo "Usuario Y Passwords"
 
@@ -308,22 +295,18 @@ logo "Usuario Y Passwords"
 	printf " %sroot%s : %s%s%s\n %s%s%s : %s%s%s\n" "${CBL}" "${CNC}" "${CRE}" "${PASSWDR}" "${CNC}" "${CYE}" "${USR}" "${CNC}" "${CRE}" "${PASSWD}" "${CNC}"
 	okie
 	sleep 3
-	clear
+clear
 
-#----------------------------------------
 #          Refreshing Mirrors
-#----------------------------------------
 
 logo "Refrescando mirros en la nueva Instalacion"
 
 	$CHROOT reflector --verbose --latest 5 --country 'United States' --age 6 --sort rate --save /etc/pacman.d/mirrorlist >/dev/null 2>&1
 	$CHROOT pacman -Syy
 	okie
-	clear
+clear
 
-#----------------------------------------
-#          Install GRUB
-#----------------------------------------
+#          Instalar GRUB
 
 logo "Instalando GRUB"
 
@@ -335,49 +318,8 @@ logo "Instalando GRUB"
 	echo
 	$CHROOT grub-mkconfig -o /boot/grub/grub.cfg
 	okie
-	clear  
+clear 
 
-#----------------------------------------
-#          Optimizations
-#----------------------------------------
-
-#logo "Aplicando optmizaciones.."
-
-#	titleopts "Editando pacman. Se activan descargas paralelas, el color y el easter egg ILoveCandy"
-#	sed -i 's/#Color/Color/; s/#ParallelDownloads = 5/ParallelDownloads = 5/; /^ParallelDownloads =/a ILoveCandy' /mnt/etc/pacman.conf
-#	okie
-    
-#   titleopts "Optimiza y acelera ext4 para SSD"
-#    sed -i '0,/relatime/s/relatime/noatime,commit=120,barrier=0/' /mnt/etc/fstab
-#	$CHROOT tune2fs -O fast_commit "${partroot}" >/dev/null
-#	okie
-    
-#    titleopts "Optimizando las make flags para acelerar tiempos de compilado"
-#	printf "\nTienes %s%s%s cores\n" "${CBL}" "$(nproc)" "${CNC}"
-#	sed -i 's/march=x86-64/march=native/; s/mtune=generic/mtune=native/; s/-O2/-O3/; s/#MAKEFLAGS="-j2/MAKEFLAGS="-j'"$(nproc)"'/' /mnt/etc/makepkg.conf
-#	okie
-    
-#    titleopts "Configurando CPU a modo performance"
-#	$CHROOT pacman -S cpupower --noconfirm >/dev/null
-#	sed -i "s/#governor='ondemand'/governor='performance'/" /mnt/etc/default/cpupower
-#	okie
-    
-#    titleopts "Cambiando el scheduler del kernel a mq-deadline"
-#	cat >> /mnt/etc/udev/rules.d/60-ssd.rules <<- EOL
-#		ACTION=="add|change", KERNEL=="sd[a-z]*", ATTR{queue/rotational}=="0", ATTR{queue/scheduler}="mq-deadline"
-#	EOL
-#	okie
-
-#	titleopts "Modificando swappiness"
-#	cat >> /mnt/etc/sysctl.d/99-swappiness.conf <<- EOL
-#		vm.swappiness=10
-#		vm.vfs_cache_pressure=50
-#	EOL
-#	okie
-
-#	titleopts "Deshabilitando Journal logs.."
-#	sed -i 's/#Storage=auto/Storage=none/' /mnt/etc/systemd/journald.conf
-#	okie
     
     titleopts "Desabilitando modulos del kernel innecesarios"
 	cat >> /mnt/etc/modprobe.d/blacklist.conf <<- EOL
@@ -391,40 +333,10 @@ logo "Instalando GRUB"
 	titleopts "Deshabilitando servicios innecesarios"
 	echo
 	$CHROOT systemctl mask lvm2-monitor.service systemd-random-seed.service
-	okie
-	
-#	titleopts "Acelerando internet con los DNS de Cloudflare"
-#	if $CHROOT pacman -Qi dhcpcd > /dev/null ; then
-#	cat >> /mnt/etc/dhcpcd.conf <<- EOL
-#		noarp
-#		static domain_name_servers=1.1.1.1 1.0.0.1
-#	EOL
-#		else
-#	cat >> /mnt/etc/NetworkManager/conf.d/dns-servers.conf <<- EOL
-#		[global-dns-domain-*]
-#		servers=1.1.1.1,1.0.0.1
-#	EOL
-#	fi
-#	okie
+	okie	
 
-#	titleopts "Configurando almacenamiento personal"
-#	cat >> /mnt/etc/fstab <<-EOL		
-#	# My sTuFF
-#	UUID=01D3AE59075CA1F0		/run/media/$USR/windows 	ntfs-3g		auto,rw,users,uid=1000,gid=984,dmask=022,fmask=133,big_writes,hide_hid_files,windows_names,noatime	0 0
-#	EOL
-	
-#	okie
-#	clear
-	
-#----------------------------------------
-#          Installing Packages
-#----------------------------------------
+#          Instalación de paquetes
 
-#logo "Instalando Audio & Video"
-
-#    mkdir /mnt/dots
-#	mount -U 6bca691d-82f3-4dd5-865b-994f99db54e1 -w /mnt/dots
-		
 	$CHROOT pacman -S \
 					  mesa-amber xorg-server xf86-video-intel xorg-xinput xorg-xrdb xorg-xsetroot xorg-xwininfo xorg-xkill \
 					  --noconfirm
@@ -466,7 +378,7 @@ logo "Instalando soporte para montar volumenes y dispositivos multimedia extraib
 logo "Instalando apps que yo uso"
 
 	$CHROOT pacman -S \
-					  bleachbit gcolor3 geany xdotool physlock ly \
+					  bleachbit gimp gcolor3 geany xdotool physlock ly \
 					  htop ueberzug viewnior zathura zathura-pdf-poppler neovim \
 					  retroarch retroarch-assets-xmb retroarch-assets-ozone libxxf86vm \
 					  pass xclip yt-dlp minidlna grsync \
@@ -475,9 +387,8 @@ logo "Instalando apps que yo uso"
 					  --noconfirm
 	clear
 		
-#----------------------------------------
+
 #          AUR Packages
-#----------------------------------------
 	
 	echo "cd && git clone https://aur.archlinux.org/paru.git && cd paru && makepkg -si --noconfirm && cd" | $CHROOT su "$USR"
 	
@@ -505,40 +416,6 @@ logo "Activando Servicios"
 #----------------------------------------
 #          Xorg conf only intel
 #----------------------------------------
-
-	
-#logo "Generating my XORG config files"
-	
-#	cat >> /mnt/etc/X11/xorg.conf.d/20-intel.conf <<EOL		
-#Section "Device"
-#	Identifier	"Intel Graphics"
-#	Driver		"Intel"
-#	Option		"AccelMethod"	"sna"
-#	Option		"DRI"		"3"
-#	Option		"TearFree"	"true"
-#	Option 		"TripleBuffer" "true"
-#EndSection
-#EOL
-#		printf "%s20-intel.conf%s generated in --> /etc/X11/xorg.conf.d\n" "${CGR}" "${CNC}"
-		  
-#	cat >> /mnt/etc/X11/xorg.conf.d/10-monitor.conf <<EOL
-#Section "Monitor"
-#	Identifier	"HP"
-#	Option		"DPMS"	"true"
-#EndSection
-
-#Section "ServerFlags"
-#	Option	"StandbyTime"	"120"
-#	Option	"SuspendTime"	"120"
-#	Option	"OffTime"	"120"
-#	Option	"BlankTime"	"0"
-#EndSection
-	
-#Section "ServerLayout"
-#	Identifier	"ServerLayout0"
-#EndSection
-#EOL
-#		printf "$%s10-monitor.conf$%s generated in --> /etc/X11/xorg.conf.d\n" "${CGR}" "${CNC}"
 		
 	cat >> /mnt/etc/X11/xorg.conf.d/00-keyboard.conf <<EOL
 Section "InputClass"
@@ -563,11 +440,10 @@ EOL
 #EOL
 #		printf "%sdrirc%s generated in --> /etc" "${CGR}" "${CNC}"
 #		sleep 2
-		clear
+clear
 	
-#----------------------------------------
-#          Reverting No Pasword Privileges
-#----------------------------------------
+
+#          Reversión de privilegios sin contraseña
 
 	sed -i 's/%wheel ALL=(ALL:ALL) NOPASSWD: ALL/# %wheel ALL=(ALL:ALL) NOPASSWD: ALL/' /mnt/etc/sudoers
 
