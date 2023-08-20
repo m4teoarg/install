@@ -55,7 +55,19 @@ logo() {
 	printf ' %s%s[%s %s %s]%s\n\n' "$CBO" "$CRE" "$CYE" "${text}" "$CRE" "$CNC"
 }
 	
+logo "Modo de arranque"
 
+	if [ -d /sys/firmware/efi/efivars ]; then	
+			bootmode="uefi"
+			printf " El escript se ejecutara en modo EFI"
+			sleep 2
+			clear			
+		else		
+			bootmode="mbrbios"
+			printf " El escript se ejecutara en modo BIOS/MBR"
+			sleep 2
+			clear
+	fi
 
 #          Obteniendo información usuario, root, Hostname 
 
