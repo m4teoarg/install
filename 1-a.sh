@@ -5,6 +5,30 @@ loadkeys la-latin1
 #----------------------------------------
 #          Setting some vars
 #----------------------------------------
+network(){
+testping=$(ping -q -c 1 -W 1 archlinux.org >/dev/null)
+
+if $testping ; then
+   ipx=$(curl -s www.icanhazip.com)
+   isp=$(lynx -dump https://www.iplocation.net | grep "ISP:" | cut -d ":" -f 2- | cut -c 2-200)
+   echo -e "IP: \e[32m$ipx\e[0m ISP: \e[32m$isp\e[0m"
+else
+echo -e "\e[31mProblema de red o desconectado\e[0m"
+fi
+pingx=$(ping -c 1 archlinux.org | head -n2 )
+echo -e "\e[90m$pingx\e[0m"
+echo ""
+}
+
+echo -e "\e[33mEstado de conexión\e[0m"
+
+if ping -q -c 1 -W 1 8.8.8.8 >/dev/null; then
+  network
+else
+ echo -e "\e[31mSistema desconectado\e[0m"
+fi
+
+echo ""
 
 CRE=$(tput setaf 1)
 CYE=$(tput setaf 3)
