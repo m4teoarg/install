@@ -130,7 +130,7 @@ PS3="Escoge el DISCO (NO la particion) donde Arch Linux se instalara: "
 				break
 			fi
 		done
-			clear
+clear
 
 
 #          Creando y Montando particion raiz
@@ -145,7 +145,7 @@ logo "Formatenado y Montando Particiones"
 			lsblk "${drive}" -I 8 -o NAME,SIZE,FSTYPE,PARTTYPENAME
 			echo
 			
-			PS3="Escoge la particion raiz que acabas de crear donde Arch Linux se instalara: "
+PS3="Escoge la particion raiz que acabas de crear donde Arch Linux se instalara: "
 	select partroot in $(fdisk -l "${drive}" | grep Linux | cut -d" " -f1) 
 		do
 			if [ "$partroot" ]; then
@@ -241,7 +241,7 @@ logo "Instalando sistema base"
 	         intel-ucode \
 	         mkinitcpio \
 	         reflector \
-	         git
+	         git networkmanager
 	         
 	okie
 clear
@@ -259,7 +259,7 @@ logo "Generando FSTAB"
 	
 logo "Configurando Timezone y Locales"
 		
-	$CHROOT ln -sf /usr/share/zoneinfo/America/Mexico_City /etc/localtime
+	$CHROOT ln -sf /usr/share/zoneinfo/America/Argentina/Buenos_Aires /etc/localtime
 	$CHROOT hwclock --systohc
 	echo
 	echo "es_AR.UTF-8 UTF-8" >> /mnt/etc/locale.gen
@@ -308,17 +308,35 @@ clear
 
 #          Instalar GRUB
 
+#logo "Instalando GRUB"
+
+#	$CHROOT pacman -S grub os-prober ntfs-3g --noconfirm >/dev/null
+#	$CHROOT grub-install --target=i386-pc "$drive"
+	
+#	sed -i 's/quiet/zswap.enabled=0 mitigations=off nowatchdog/; s/#GRUB_DISABLE_OS_PROBER/GRUB_DISABLE_OS_PROBER/' /mnt/etc/default/grub
+	#sed -i "s/MODULES=()/MODULES=(intel_agp i915)/" /mnt/etc/mkinitcpio.conf
+#	echo
+#	$CHROOT grub-mkconfig -o /boot/grub/grub.cfg
+#	okie
+#clear
+
 logo "Instalando GRUB"
 
-	$CHROOT pacman -S grub os-prober ntfs-3g --noconfirm >/dev/null
-	$CHROOT grub-install --target=i386-pc "$drive"
+	if [ "$bootmode" == "uefi" ]; then
+	
+			$CHROOT pacman -S grub efibootmgr os-prober ntfs-3g --noconfirm >/dev/null
+			$CHROOT grub-install --target=x86_64-efi --efi-directory=/efi --bootloader-id=Arch
+		else		
+			$CHROOT pacman -S grub os-prober ntfs-3g --noconfirm >/dev/null
+			$CHROOT grub-install --target=i386-pc "$drive"
+	fi
 	
 	sed -i 's/quiet/zswap.enabled=0 mitigations=off nowatchdog/; s/#GRUB_DISABLE_OS_PROBER/GRUB_DISABLE_OS_PROBER/' /mnt/etc/default/grub
-	#sed -i "s/MODULES=()/MODULES=(intel_agp i915)/" /mnt/etc/mkinitcpio.conf
+	#sed -i "s/MODULES=()/MODULES=(${cpu_atkm})/" /mnt/etc/mkinitcpio.conf
 	echo
 	$CHROOT grub-mkconfig -o /boot/grub/grub.cfg
 	okie
-clear 
+clear
 
     
     titleopts "Desabilitando modulos del kernel innecesarios"
@@ -333,7 +351,16 @@ clear
 	titleopts "Deshabilitando servicios innecesarios"
 	echo
 	$CHROOT systemctl mask lvm2-monitor.service systemd-random-seed.service
-	okie	
+	okie
+
+#		Instalando gnome y servicios
+
+# 		Instala GNOME, GDM y NetworkManager
+		$CHROOT pacman -S gnome gdm --noconfirm >/dev/null
+
+# 		Habilita los servicios de GDM y NetworkManager
+		
+			
 
 #          Instalación de paquetes
 
@@ -405,6 +432,7 @@ logo "Instalando apps que yo uso"
 logo "Activando Servicios"
 
 	$CHROOT systemctl enable NetworkManager.service ly.service cpupower systemd-timesyncd.service
+	$CHROOT systemctl enable gdm.service
 	$CHROOT systemctl enable zramswap.service
 	echo "systemctl --user enable mpd.service" | $CHROOT su "$USR"
 
