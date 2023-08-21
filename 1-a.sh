@@ -242,31 +242,19 @@ clear
 	done
 clear
 
-#          Refreshing Mirrors
-
-logo "Refrescando mirros en la nueva Instalacion"
-
-	$CHROOT reflector --verbose --latest 5 --country 'United States' --age 6 --sort rate --save /etc/pacman.d/mirrorlist >/dev/null 2>&1
-	$CHROOT pacman -Syy
-	okie
-clear
-
 #          Pacstrap base system
 
 logo "Instalando sistema base"
 	
 	pacstrap /mnt \
 	         base base-devel \
-	         linux-zen linux-firmware \
-	         dhcpcd \
-	         intel-ucode \
+	         linux linux-firmware \
 	         mkinitcpio \
 	         reflector \
 	         git networkmanager
 	         
 	okie
 clear
-
 
 #          Generating FSTAB
     
@@ -349,6 +337,15 @@ logo "Instalando GRUB"
 	sed -i "s/MODULES=()/MODULES=(${cpu_atkm})/" /mnt/etc/mkinitcpio.conf
 	echo
 	$CHROOT grub-mkconfig -o /boot/grub/grub.cfg
+	okie
+clear
+
+#          Refreshing Mirrors
+
+logo "Refrescando mirros en la nueva Instalacion"
+
+	$CHROOT reflector --verbose --latest 5 --country 'United States' --age 6 --sort rate --save /etc/pacman.d/mirrorlist >/dev/null 2>&1
+	$CHROOT pacman -Syy
 	okie
 clear
 
@@ -445,7 +442,7 @@ clear
 
 #          Reversión de privilegios sin contraseña
 
-	sed -i 's/%wheel ALL=(ALL:ALL) NOPASSWD: ALL/# %wheel ALL=(ALL:ALL) NOPASSWD: ALL/' /mnt/etc/sudoers
+	#sed -i 's/%wheel ALL=(ALL:ALL) NOPASSWD: ALL/# %wheel ALL=(ALL:ALL) NOPASSWD: ALL/' /mnt/etc/sudoers
 
 		
 	while true; do
