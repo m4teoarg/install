@@ -59,12 +59,12 @@ logo "Modo de arranque"
 
 	if [ -d /sys/firmware/efi/efivars ]; then	
 			bootmode="uefi"
-			printf " El escript se ejecutara en modo EFI"
+			printf " \e[31mEl escript se ejecutara en modo EFI\e[0m"
 			sleep 2
 			clear			
 		else		
 			bootmode="mbrbios"
-			printf " El escript se ejecutara en modo BIOS/MBR"
+			printf " \e[32mEl escript se ejecutara en modo BIOS/MBR\e[0m"
 			sleep 2
 			clear
 	fi
