@@ -179,7 +179,7 @@ PS3="Escoge la particion raiz que acabas de crear donde Arch Linux se instalara:
 
 logo "Configurando SWAP"
 
-	PS3="Escoge la particion SWAP: "
+PS3="Escoge la particion SWAP: "
 	select swappart in $(fdisk -l | grep -E "swap" | cut -d" " -f1) "No quiero swap" "Crear archivo swap"
 		do
 			if [ "$swappart" = "Crear archivo swap" ]; then
@@ -222,7 +222,7 @@ clear
 		printf " Hostname:  %s%s%s\n" "${CBL}" "$HNAME" "${CNC}"
 	
 	if [ "$swappart" = "Crear archivo swap" ]; then
-			printf " Swap:      %sSi%s se crea archivo swap de 4G\n" "${CGR}" "${CNC}"
+			printf " Swap:      %sSi%s se crea archivo swap de 2G\n" "${CGR}" "${CNC}"
 	elif [ "$swappart" = "No quiero swap" ]; then
 			printf " Swap:      %sNo%s\n" "${CRE}" "${CNC}"
 	elif [ "$swappart" ]; then
@@ -240,6 +240,15 @@ clear
 			* ) printf " Error: solo necesitas escribir 's' o 'n'\n\n";;
 		esac
 	done
+clear
+
+#          Refreshing Mirrors
+
+logo "Refrescando mirros en la nueva Instalacion"
+
+	$CHROOT reflector --verbose --latest 5 --country 'United States' --age 6 --sort rate --save /etc/pacman.d/mirrorlist >/dev/null 2>&1
+	$CHROOT pacman -Syy
+	okie
 clear
 
 #          Pacstrap base system
@@ -309,14 +318,7 @@ logo "Usuario Y Passwords"
 	sleep 3
 clear
 
-#          Refreshing Mirrors
 
-logo "Refrescando mirros en la nueva Instalacion"
-
-	$CHROOT reflector --verbose --latest 5 --country 'United States' --age 6 --sort rate --save /etc/pacman.d/mirrorlist >/dev/null 2>&1
-	$CHROOT pacman -Syy
-	okie
-clear
 
 #          Instalar GRUB
 
@@ -344,40 +346,16 @@ logo "Instalando GRUB"
 	fi
 	
 	sed -i 's/quiet/zswap.enabled=0 mitigations=off nowatchdog/; s/#GRUB_DISABLE_OS_PROBER/GRUB_DISABLE_OS_PROBER/' /mnt/etc/default/grub
-	#sed -i "s/MODULES=()/MODULES=(${cpu_atkm})/" /mnt/etc/mkinitcpio.conf
+	sed -i "s/MODULES=()/MODULES=(${cpu_atkm})/" /mnt/etc/mkinitcpio.conf
 	echo
 	$CHROOT grub-mkconfig -o /boot/grub/grub.cfg
 	okie
 clear
 
-    
-    titleopts "Desabilitando modulos del kernel innecesarios"
-	cat >> /mnt/etc/modprobe.d/blacklist.conf <<- EOL
-		blacklist iTCO_wdt
-		blacklist mousedev
-		blacklist mac_hid
-		blacklist uvcvideo
-	EOL
-	okie
-	
-	titleopts "Deshabilitando servicios innecesarios"
-	echo
-	$CHROOT systemctl mask lvm2-monitor.service systemd-random-seed.service
-	okie
-
-#		Instalando gnome y servicios
-
-# 		Instala GNOME, GDM y NetworkManager
-		$CHROOT pacman -S gnome gdm --noconfirm >/dev/null
-
-# 		Habilita los servicios de GDM y NetworkManager
-		
-			
-
 #          Instalación de paquetes
 
 	$CHROOT pacman -S \
-					  mesa-amber xorg-server xf86-video-intel xorg-xinput xorg-xrdb xorg-xsetroot xorg-xwininfo xorg-xkill \
+					  mesa mesa-demos xorg-server xorg-xinit xf86-video-intel xorg-xinput xorg-xrdb xorg-xsetroot xorg-xwininfo xorg-xkill \
 					  --noconfirm
 					  	
 	$CHROOT pacman -S \
@@ -417,33 +395,29 @@ logo "Instalando soporte para montar volumenes y dispositivos multimedia extraib
 logo "Instalando apps que yo uso"
 
 	$CHROOT pacman -S \
-					  bleachbit gimp gcolor3 geany xdotool physlock ly \
-					  htop ueberzug viewnior zathura zathura-pdf-poppler neovim \
-					  retroarch retroarch-assets-xmb retroarch-assets-ozone libxxf86vm \
-					  pass xclip yt-dlp minidlna grsync \
-					  firefox firefox-i18n-es-mx pavucontrol \
-					  papirus-icon-theme ttf-jetbrains-mono ttf-jetbrains-mono-nerd ttf-joypixels ttf-inconsolata ttf-ubuntu-mono-nerd ttf-terminus-nerd \
+					  bleachbit gimp gcolor3 geany xdotool physlock git \
+					  neovim firefox firefox-i18-es-mx papirus-icon-theme ttf-jetbrains-mono ttf-jetbrains-mono-nerd ttf-joypixels ttf-inconsolata ttf-ubuntu-mono-nerd ttf-terminus-nerd \
 					  --noconfirm
 	clear
-		
-
 #          AUR Packages
 	
 	echo "cd && git clone https://aur.archlinux.org/paru.git && cd paru && makepkg -si --noconfirm && cd" | $CHROOT su "$USR"
 	
-	#echo "cd && paru -S eww-x11 simple-mtpfs tdrop-git --skipreview --noconfirm --removemake" | $CHROOT su "$USR"
-	#echo "cd && paru -S zramswap stacer --skipreview --noconfirm --removemake" | $CHROOT su "$USR"
-	#echo "cd && paru -S spotify spotify-adblock-git mpv-git popcorntime-bin --skipreview --noconfirm --removemake" | $CHROOT su "$USR"
-	#echo "cd && paru -S whatsapp-nativefier telegram-desktop-bin simplescreenrecorder --skipreview --noconfirm --removemake" | $CHROOT su "$USR"
-	#echo "cd && paru -S cmatrix-git transmission-gtk3 qogir-icon-theme --skipreview --noconfirm --removemake" | $CHROOT su "$USR"
 
-#----------------------------------------
+#		Instalando gnome y servicios
+logo "Instalando gnome y gdm"
+# 		Instala GNOME, GDM y NetworkManager
+		$CHROOT pacman -S \
+						 gnome gdm \
+						 --noconfirm
+		clear
+
 #          Enable Services & other stuff
-#----------------------------------------
+
 
 logo "Activando Servicios"
 
-	$CHROOT systemctl enable NetworkManager.service ly.service cpupower systemd-timesyncd.service
+	$CHROOT systemctl enable NetworkManager.service 
 	$CHROOT systemctl enable gdm.service
 	$CHROOT systemctl enable zramswap.service
 	echo "systemctl --user enable mpd.service" | $CHROOT su "$USR"
@@ -453,9 +427,9 @@ logo "Activando Servicios"
 	#echo "export __GLX_VENDOR_LIBRARY_NAME=amber" >> /mnt/etc/profile
 	sed -i 's/20/30/' /mnt/etc/zramswap.conf
 
-#----------------------------------------
+
 #          Xorg conf only intel
-#----------------------------------------
+
 		
 	cat >> /mnt/etc/X11/xorg.conf.d/00-keyboard.conf <<EOL
 Section "InputClass"
@@ -464,22 +438,8 @@ Section "InputClass"
 		Option	"XkbLayout"	"latam"
 EndSection
 EOL
-		printf "%s00-keyboard.conf%s generated in --> /etc/X11/xorg.conf.d\n" "${CGR}" "${CNC}"
-		
-#	cat >> /mnt/etc/drirc <<EOL
-#<driconf>
+		printf "%s00-keyboard.conf%s generated in --> /etc/X11/xorg.conf.d\n" "${CGR}" "${CNC}"		
 
-#	<device driver="i915">
-#		<application name="Default">
-#			<option name="stub_occlusion_query" value="true" />
-#			<option name="fragment_shader" value="true" />
-#		</application>
-#	</device>
-	
-#</driconf>
-#EOL
-#		printf "%sdrirc%s generated in --> /etc" "${CGR}" "${CNC}"
-#		sleep 2
 clear
 	
 
