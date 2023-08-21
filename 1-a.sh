@@ -251,7 +251,7 @@ logo "Instalando sistema base"
 	         linux linux-firmware \
 	         mkinitcpio \
 	         reflector \
-	         git networkmanager
+	         networkmanager
 	         
 	okie
 clear
@@ -297,7 +297,7 @@ clear
 logo "Usuario Y Passwords"
 
 	echo "root:$PASSWDR" | $CHROOT chpasswd
-	$CHROOT useradd -m -g users -G wheel -s /usr/bin/zsh "${USR}"
+	$CHROOT useradd -m -g users -G wheel -s /usr/bin/ "${USR}"
 	echo "$USR:$PASSWD" | $CHROOT chpasswd
 	sed -i 's/# %wheel ALL=(ALL:ALL) NOPASSWD: ALL/%wheel ALL=(ALL:ALL) NOPASSWD: ALL/; /^root ALL=(ALL:ALL) ALL/a '"${USR}"' ALL=(ALL:ALL) ALL' /mnt/etc/sudoers
 	echo "Defaults insults" >> /mnt/etc/sudoers
@@ -398,8 +398,9 @@ logo "Instalando apps que yo uso"
 	clear
 #          AUR Packages
 	
-	echo "cd && git clone https://aur.archlinux.org/paru.git && cd paru && makepkg -si --noconfirm && cd" | $CHROOT su "$USR"
-	
+git clone https://aur.archlinux.org/paru.git | $CHROOT su "$USR"
+cd paru
+makepkg -si	| $CHROOT su "$USR"
 
 #		Instalando gnome y servicios
 logo "Instalando gnome y gdm"
