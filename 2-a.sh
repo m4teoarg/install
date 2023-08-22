@@ -257,7 +257,8 @@ if [ "${PARUH}" = "Si" ]; then
 
 #          Pacstrap base system
 
-logo "Instalando sistema base"	
+logo "Instalando sistema base"
+    $CHROOT reflector --verbose --latest 5 --country 'United States' --age 24 --sort rate --save /etc/pacman.d/mirrorlist
 	pacstrap /mnt \
 	         base base-devel \
 	         linux linux-firmware \
