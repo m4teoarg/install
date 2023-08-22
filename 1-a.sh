@@ -249,9 +249,8 @@ logo "Instalando sistema base"
 	pacstrap /mnt \
 	         base base-devel \
 	         linux linux-firmware \
-	         mkinitcpio \
-	         reflector \
-	         networkmanager
+	         mkinitcpio networkmanager \	         
+	          
 	         
 	okie
 clear
@@ -303,7 +302,7 @@ logo "Usuario Y Passwords"
 	echo "Defaults insults" >> /mnt/etc/sudoers
 	printf " %sroot%s : %s%s%s\n %s%s%s : %s%s%s\n" "${CBL}" "${CNC}" "${CRE}" "${PASSWDR}" "${CNC}" "${CYE}" "${USR}" "${CNC}" "${CRE}" "${PASSWD}" "${CNC}"
 	okie
-	sleep 3
+	sleep 8
 clear
 
 
@@ -349,64 +348,31 @@ logo "Refrescando mirros en la nueva Instalacion"
 	okie
 clear
 
-#          Instalación de paquetes
 
-	$CHROOT pacman -S \
-					  mesa mesa-demos xorg-server xorg-xinit xf86-video-intel xorg-xinput xorg-xrdb xorg-xsetroot xorg-xwininfo xorg-xkill \
-					  --noconfirm
-					  	
-	$CHROOT pacman -S \
-					  pipewire pipewire-pulse \
-					  --noconfirm
-	clear
-	
-logo "Instalando codecs multimedia y utilidades"
 
-	$CHROOT pacman -S \
-                      ffmpeg ffmpegthumbnailer aom libde265 x265 x264 libmpeg2 xvidcore libtheora libvpx sdl \
-                      jasper openjpeg2 libwebp webp-pixbuf-loader \
-                      unarchiver lha lrzip lzip p7zip lbzip2 arj lzop cpio unrar unzip zip unarj xdg-utils \
-                      --noconfirm
-	clear
-	
-logo "Instalando soporte para montar volumenes y dispositivos multimedia extraibles"
-
-	$CHROOT pacman -S \
-					  libmtp gvfs-nfs gvfs gvfs-mtp \
-					  dosfstools usbutils net-tools \
-					  xdg-user-dirs gtk-engine-murrine \
-					  --noconfirm
-	clear
-
-#logo "Instalando todo el entorno bspwm"
-
-#	$CHROOT pacman -S \
-#					  bspwm sxhkd polybar picom rofi dunst \
-#					  alacritty ranger maim lsd feh polkit-gnome \
-#					  mpd ncmpcpp mpc pamixer playerctl pacman-contrib \
-#					  thunar thunar-archive-plugin tumbler xarchiver jq \
-#					  zsh-autosuggestions zsh-history-substring-search zsh-syntax-highlighting \
-#					  --noconfirm
-#	clear
-	
-logo "Instalando apps que yo uso"
-
-	$CHROOT pacman -S \
-					  bleachbit gimp gcolor3 geany xdotool physlock git \
-					  neovim firefox firefox-i18-es-mx papirus-icon-theme ttf-jetbrains-mono ttf-jetbrains-mono-nerd ttf-joypixels ttf-inconsolata ttf-ubuntu-mono-nerd ttf-terminus-nerd \
-					  --noconfirm
-	clear
 #          AUR Packages
+	echo "cd && git clone https://aur.archlinux.org/paru.git && cd paru && makepkg -si --noconfirm && cd" | $CHROOT su "$USR"
 	
-git clone https://aur.archlinux.org/paru.git | $CHROOT su "$USR"
-cd paru
-makepkg -si	| $CHROOT su "$USR"
+	echo "cd && paru -S spotify spotify-adblock-git mpv-git popcorntime-bin --skipreview --noconfirm --removemake" | $CHROOT su "$USR"	
+	
+
+
 
 #		Instalando gnome y servicios
 logo "Instalando gnome y gdm"
 # 		Instala GNOME, GDM y NetworkManager
 		$CHROOT pacman -S \
 						 gnome gdm \
+						 mesa mesa-demos xorg-server xorg-xinit xf86-video-intel xorg-xinput xorg-xrdb xorg-xsetroot xorg-xwininfo xorg-xkill \
+						 pipewire pipewire-pulse \
+						 firefox git nano neovim gimp \
+						 gvfs gvfs-nfs gvfs-mtp \
+						 dosfstools usbutils net-tools \
+						 xdg-user-dirs gtk-engine-murrine \
+						 ffmpeg ffmpegthumbnailer aom libde265 x265 x264 libmpeg2 xvidcore libtheora libvpx sdl \
+                      	 jasper openjpeg2 libwebp webp-pixbuf-loader \
+                     	 unarchiver lha lrzip lzip p7zip lbzip2 arj lzop cpio unrar unzip zip unarj xdg-utils \
+						 papirus-icon-theme ttf-jetbrains-mono ttf-jetbrains-mono-nerd ttf-joypixels ttf-inconsolata ttf-ubuntu-mono-nerd ttf-terminus-nerd \		 
 						 --noconfirm
 		clear
 
@@ -417,19 +383,19 @@ logo "Activando Servicios"
 
 	$CHROOT systemctl enable NetworkManager.service 
 	$CHROOT systemctl enable gdm.service
-	$CHROOT systemctl enable zramswap.service
+	#$CHROOT systemctl enable zramswap.service
 	echo "systemctl --user enable mpd.service" | $CHROOT su "$USR"
 
 	echo "xdg-user-dirs-update" | $CHROOT su "$USR"
 	echo "timeout 1s librewolf --headless" | $CHROOT su "$USR"
 	#echo "export __GLX_VENDOR_LIBRARY_NAME=amber" >> /mnt/etc/profile
-	sed -i 's/20/30/' /mnt/etc/zramswap.conf
+	#sed -i 's/20/30/' /mnt/etc/zramswap.conf
 
 
 #          Xorg conf only intel
 
 		
-	cat >> /mnt/etc/X11/xorg.conf.d/00-keyboard.conf <<EOL
+cat >> /mnt/etc/X11/xorg.conf.d/00-keyboard.conf <<EOL
 Section "InputClass"
 		Identifier	"system-keyboard"
 		MatchIsKeyboard	"on"
@@ -443,7 +409,7 @@ clear
 
 #          Reversión de privilegios sin contraseña
 
-	#sed -i 's/%wheel ALL=(ALL:ALL) NOPASSWD: ALL/# %wheel ALL=(ALL:ALL) NOPASSWD: ALL/' /mnt/etc/sudoers
+	sed -i 's/%wheel ALL=(ALL:ALL) NOPASSWD: ALL/# %wheel ALL=(ALL:ALL) NOPASSWD: ALL/' /mnt/etc/sudoers
 
 		
 	while true; do
