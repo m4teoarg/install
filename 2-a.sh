@@ -257,8 +257,7 @@ if [ "${PARUH}" = "Si" ]; then
 
 #          Pacstrap base system
 
-logo "Instalando sistema base"
-	reflector --verbose --latest 5 --country 'United States' --age 6 --sort rate --save /etc/pacman.d/mirrorlist >/dev/null 2>&1
+logo "Instalando sistema base"	
 	pacstrap /mnt \
 	         base base-devel \
 	         linux linux-firmware \
@@ -318,12 +317,12 @@ logo "Usuario Y Passwords"
 	sleep 8
 clear
 
-logo "Refrescando mirros en la nueva Instalacion"
+#logo "Refrescando mirros en la nueva Instalacion"
 
-	$CHROOT reflector --verbose --latest 5 --country 'United States' --age 6 --sort rate --save /etc/pacman.d/mirrorlist >/dev/null 2>&1
-	$CHROOT pacman -Syy
-	okie
-	clear
+#	$CHROOT reflector --verbose --latest 5 --country 'United States' --age 6 --sort rate --save /etc/pacman.d/mirrorlist >/dev/null 2>&1
+#	$CHROOT pacman -Syy
+#	okie
+#	clear
 
 #          Instalar GRUB
 
