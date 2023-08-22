@@ -120,6 +120,14 @@ while true; do
 done
 
 clear
+PS3="Quieres instalar PARU como AUR Helper?: "
+	select PARUH in "Si" "No"
+		do
+			if [ $PARUH ]; then
+				break
+			fi
+		done
+
 
 #          Seleccionar DISCO
 
@@ -244,8 +252,7 @@ clear
 #          Pacstrap base system
 
 logo "Instalando sistema base"
-    pacstrap /mnt base base-devel linux linux-firmware mkinitcpio networkmanager git          
-	         
+    pacstrap /mnt base base-devel linux linux-firmware mkinitcpio networkmanager git	         
 	okie
 clear
 
@@ -255,7 +262,7 @@ logo "Generando FSTAB"
 
 		genfstab -U /mnt >> /mnt/etc/fstab
 		okie
-	clear
+clear
 
 #          Timezone, Lang & Keyboard
 	
@@ -299,27 +306,6 @@ logo "Usuario Y Passwords"
 	sleep 8
 clear
 
-#logo "Refrescando mirros en la nueva Instalacion"
-
-#	$CHROOT reflector --verbose --latest 5 --country 'United States' --age 6 --sort rate --save /etc/pacman.d/mirrorlist >/dev/null 2>&1
-#	$CHROOT pacman -Syy
-#	okie
-#	clear
-
-#          Instalar GRUB
-
-#logo "Instalando GRUB"
-
-#	$CHROOT pacman -S grub os-prober ntfs-3g --noconfirm >/dev/null
-#	$CHROOT grub-install --target=i386-pc "$drive"
-	
-#	sed -i 's/quiet/zswap.enabled=0 mitigations=off nowatchdog/; s/#GRUB_DISABLE_OS_PROBER/GRUB_DISABLE_OS_PROBER/' /mnt/etc/default/grub
-	#sed -i "s/MODULES=()/MODULES=(intel_agp i915)/" /mnt/etc/mkinitcpio.conf
-#	echo
-#	$CHROOT grub-mkconfig -o /boot/grub/grub.cfg
-#	okie
-#clear
-
 logo "Instalando GRUB"
 
 	if [ "$bootmode" == "uefi" ]; then
@@ -342,7 +328,7 @@ clear
 
 logo "Refrescando mirros en la nueva Instalacion"
 
-	$CHROOT reflector --verbose --latest 5 --country 'United States' --age 6 --sort rate --save /etc/pacman.d/mirrorlist >/dev/null 2>&1
+	$CHROOT reflector --verbose --latest 5 --country 'United States' --age 6 --sort rate --save /etc/pacman.d/mirrorlist
 	$CHROOT pacman -Syy
 	okie
 clear
@@ -359,56 +345,11 @@ logo "Instalando gnome y gdm"
 						 dosfstools usbutils net-tools \
 						 xdg-user-dirs gtk-engine-murrine \
 						 ffmpeg ffmpegthumbnailer aom libde265 x265 x264 libmpeg2 xvidcore libtheora libvpx sdl \
-                      	 jasper openjpeg2 libwebp webp-pixbuf-loader \
-                     	 unarchiver lha lrzip lzip p7zip lbzip2 arj lzop cpio unrar unzip zip unarj xdg-utils \
+						 jasper openjpeg2 libwebp webp-pixbuf-loader \
+						 unarchiver lha lrzip lzip p7zip lbzip2 arj lzop cpio unrar unzip zip unarj xdg-utils \
 						 papirus-icon-theme ttf-jetbrains-mono ttf-jetbrains-mono-nerd ttf-joypixels ttf-inconsolata ttf-ubuntu-mono-nerd ttf-terminus-nerd \		 
 						 --noconfirm
 		clear
-#if [ "${PARUH}" = "Si" ]; then
-#			printf " Paru:       %sSi%s\n" "${CGR}" "${CNC}"
-#		else
-#			printf " Paru:       %sNo%s\n" "${CRE}" "${CNC}"
-#	fi
-# Instalando PARU
-# Instalación PARU
-
-PS3="Quieres instalar PARU como AUR Helper?: "
-	select PARUH in "Si" "No"
-		do
-			if [ $PARUH ]; then
-				break
-			fi
-		done
-if [ "${PARUH}" == "Si" ]; then
-
-		logo "Instalando PARU"
-			sleep 2
-				echo "cd && git clone https://aur.archlinux.org/paru.git && cd paru && makepkg -si --noconfirm && cd" | $CHROOT su "$USR"
-			clear
-	fi
-
-if [ "${PARUH}" == "Si" ]; then
-
-		logo "zramswap"
-			sleep 2
-				echo "cd && paru -S zramswap stacer --skipreview --noconfirm --removemake" | $CHROOT su "$USR"
-			clear
-		#logo "spotify spotify-adblock mpv popcorn-time"
-		#	sleep 2
-		#		echo "cd && yay -S spotify spotify-adblock-git mpv-git popcorntime-bin --noconfirm --removemake --cleanafter" | $CHROOT su "$USR"
-		#	clear
-		#logo "Whatsapp & Telegram"
-		#	sleep 2
-		#		echo "cd && yay -S whatsapp-nativefier telegram-desktop-bin --noconfirm --removemake --cleanafter" | $CHROOT su "$USR"
-		#	clear
-		logo "Iconos, fuentes & stacer"
-			sleep 2
-				echo "cd && paru -S nerd-fonts-ubuntu-mono --noconfirm --removemake --cleanafter" | $CHROOT su "$USR"
-			clear
-		fi
-
-#          Enable Services & other stuff
-
 
 logo "Activando Servicios"
 
@@ -421,7 +362,10 @@ logo "Activando Servicios"
 	#echo "timeout 1s librewolf --headless" | $CHROOT su "$USR"
 	#echo "export __GLX_VENDOR_LIBRARY_NAME=amber" >> /mnt/etc/profile
 	#sed -i 's/20/30/' /mnt/etc/zramswap.conf
-
+logo "Instalando PARU"
+	sleep 2
+		echo "cd && git clone https://aur.archlinux.org/paru.git && cd paru && makepkg -si --noconfirm && cd" | $CHROOT su "$USR"
+	clear
 
 #          Xorg conf only intel
 
