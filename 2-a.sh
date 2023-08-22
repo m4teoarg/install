@@ -249,17 +249,10 @@ clear
 	done
 clear
 
-if [ "${PARUH}" = "Si" ]; then
-			printf " Paru:       %sSi%s\n" "${CGR}" "${CNC}"
-		else
-			printf " Paru:       %sNo%s\n" "${CRE}" "${CNC}"
-	fi
-
 #          Pacstrap base system
 
 logo "Instalando sistema base"
-    $CHROOT reflector --verbose --latest 5 --country 'United States' --age 24 --sort rate --save /etc/pacman.d/mirrorlist
-	pacstrap /mnt \
+    pacstrap /mnt \
 	         base base-devel \
 	         linux linux-firmware \
 	         mkinitcpio networkmanager git \	         
@@ -383,7 +376,11 @@ logo "Instalando gnome y gdm"
 						 papirus-icon-theme ttf-jetbrains-mono ttf-jetbrains-mono-nerd ttf-joypixels ttf-inconsolata ttf-ubuntu-mono-nerd ttf-terminus-nerd \		 
 						 --noconfirm
 		clear
-
+#if [ "${PARUH}" = "Si" ]; then
+#			printf " Paru:       %sSi%s\n" "${CGR}" "${CNC}"
+#		else
+#			printf " Paru:       %sNo%s\n" "${CRE}" "${CNC}"
+#	fi
 # Instalando PARU
 if [ "${PARUH}" == "Si" ]; then
 
