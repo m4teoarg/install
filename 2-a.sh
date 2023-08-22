@@ -120,14 +120,6 @@ while true; do
 done
 
 clear
-PS3="Quieres instalar PARU como AUR Helper?: "
-	select PARUH in "Si" "No"
-		do
-			if [ $PARUH ]; then
-				break
-			fi
-		done
-
 
 #          Seleccionar DISCO
 
@@ -252,11 +244,7 @@ clear
 #          Pacstrap base system
 
 logo "Instalando sistema base"
-    pacstrap /mnt \
-	         base base-devel \
-	         linux linux-firmware \
-	         mkinitcpio networkmanager git \	         
-	          
+    pacstrap /mnt base base-devel linux linux-firmware mkinitcpio networkmanager git          
 	         
 	okie
 clear
@@ -382,6 +370,15 @@ logo "Instalando gnome y gdm"
 #			printf " Paru:       %sNo%s\n" "${CRE}" "${CNC}"
 #	fi
 # Instalando PARU
+# Instalación PARU
+
+PS3="Quieres instalar PARU como AUR Helper?: "
+	select PARUH in "Si" "No"
+		do
+			if [ $PARUH ]; then
+				break
+			fi
+		done
 if [ "${PARUH}" == "Si" ]; then
 
 		logo "Instalando PARU"
