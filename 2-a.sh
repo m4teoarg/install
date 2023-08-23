@@ -120,13 +120,7 @@ while true; do
 done
 
 clear
-PS3="Quieres instalar PARU como AUR Helper?: "
-	select PARUH in "Si" "No"
-		do
-			if [ $PARUH ]; then
-				break
-			fi
-		done
+
 
 
 #          Seleccionar DISCO
