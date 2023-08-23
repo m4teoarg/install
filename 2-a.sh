@@ -320,30 +320,18 @@ clear
 
 #          Refreshing Mirrors
 
-logo "Refrescando mirros en la nueva Instalacion"
+#logo "Refrescando mirros en la nueva Instalacion"
 
-	$CHROOT reflector --verbose --latest 5 --country 'United States' --age 6 --sort rate --save /etc/pacman.d/mirrorlist
-	$CHROOT pacman -Syy
-	okie
-clear
+#	$CHROOT reflector --verbose --latest 5 --country 'United States' --age 6 --sort rate --save /etc/pacman.d/mirrorlist
+#	$CHROOT pacman -Syy
+#	okie
+#clear
 
 #		Instalando gnome y servicios
 logo "Instalando gnome y gdm"
 # 		Instala GNOME, GDM y NetworkManager
-		$CHROOT pacman -S \
-						 gnome gdm \
-						 mesa mesa-demos xorg-server xorg-xinit xf86-video-intel xorg-xinput xorg-xrdb xorg-xsetroot xorg-xwininfo xorg-xkill \
-						 pipewire pipewire-pulse \
-						 firefox git nano neovim gimp \
-						 gvfs gvfs-nfs gvfs-mtp \
-						 dosfstools usbutils net-tools \
-						 xdg-user-dirs gtk-engine-murrine \
-						 ffmpeg ffmpegthumbnailer aom libde265 x265 x264 libmpeg2 xvidcore libtheora libvpx sdl \
-						 jasper openjpeg2 libwebp webp-pixbuf-loader \
-						 unarchiver lha lrzip lzip p7zip lbzip2 arj lzop cpio unrar unzip zip unarj xdg-utils \
-						 papirus-icon-theme ttf-jetbrains-mono ttf-jetbrains-mono-nerd ttf-joypixels ttf-inconsolata ttf-ubuntu-mono-nerd ttf-terminus-nerd \		 
-						 --noconfirm
-		clear
+		$CHROOT pacman -S gnome gdm mesa mesa-demos xorg-server xorg-xinit xf86-video-intel pipewire pipewire-pulse firefox git nano neovim gvfs gvfs-nfs gtk-engine-murrine p7zip unzip zip xdg-utils papirus-icon-theme ttf-inconsolata ttf-ubuntu-mono-nerd ttf-terminus-nerd networkmanager	--noconfirm
+clear
 
 logo "Activando Servicios"
 
@@ -356,10 +344,6 @@ logo "Activando Servicios"
 	#echo "timeout 1s librewolf --headless" | $CHROOT su "$USR"
 	#echo "export __GLX_VENDOR_LIBRARY_NAME=amber" >> /mnt/etc/profile
 	#sed -i 's/20/30/' /mnt/etc/zramswap.conf
-logo "Instalando PARU"
-	sleep 2
-		echo "cd && git clone https://aur.archlinux.org/paru.git && cd paru && makepkg -si --noconfirm && cd" | $CHROOT su "$USR"
-	clear
 
 #          Xorg conf only intel
 
@@ -374,7 +358,11 @@ EOL
 		printf "%s00-keyboard.conf%s generated in --> /etc/X11/xorg.conf.d\n" "${CGR}" "${CNC}"		
 
 clear
-	
+# 		Instalando PARU
+logo "Instalando PARU"
+	sleep 2
+		echo "cd && git clone https://aur.archlinux.org/paru.git && cd paru && makepkg -si --noconfirm && cd" | $CHROOT su "$USR"
+clear
 
 #          Reversión de privilegios sin contraseña
 
